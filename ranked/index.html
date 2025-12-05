@@ -9,45 +9,69 @@
 <body class="bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white min-h-screen">
   <!-- LOGIN SCREEN -->
   <div id="login-screen" class="login-container">
-    <div class="login-card">
-      <div class="login-header">
-        <h1>🏆 Ranked</h1>
-        <p class="login-subtitle">Sistema de gestión de puntuaciones</p>
+    <!-- Toast de notificación en login -->
+    <div id="login-notification" class="notification login-notification hidden"></div>
+    
+    <!-- Fondo animado -->
+    <div class="login-background">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+    </div>
+
+    <div class="login-wrapper">
+      <div class="login-card">
+        <!-- Header del card -->
+        <div class="login-header">
+          <div class="login-icon">🏆</div>
+          <h1>Ranked</h1>
+          <p class="login-subtitle">Gestión de Puntuaciones</p>
+        </div>
+
+        <!-- Formulario -->
+        <form id="login-form" onsubmit="return false" class="login-form">
+          <!-- Campo Usuario -->
+          <div class="form-group">
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input 
+                id="login-usuario" 
+                type="text" 
+                placeholder="Usuario" 
+                autocomplete="username"
+              />
+            </div>
+            <div class="error-message" id="error-usuario"></div>
+          </div>
+
+          <!-- Campo Contraseña -->
+          <div class="form-group">
+            <div class="input-wrapper">
+              <span class="input-icon">🔒</span>
+              <input 
+                id="login-password" 
+                type="password" 
+                placeholder="Contraseña" 
+                autocomplete="current-password"
+              />
+            </div>
+            <div class="error-message" id="error-password"></div>
+          </div>
+
+          <!-- Botón Login -->
+          <button id="btn-login" class="btn-login-primary" type="button">
+            <span>Iniciar Sesión</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </form>
+
+        <!-- Footer -->
+        <div class="login-footer">
+          <p>Powered by <strong>Ranked</strong></p>
+        </div>
       </div>
-      
-      <form id="login-form" onsubmit="return false" class="login-form">
-        <div class="form-group">
-          <label for="login-usuario">Usuario</label>
-          <input 
-            id="login-usuario" 
-            type="text" 
-            placeholder="Ingresa tu usuario" 
-            autocomplete="username"
-          />
-          <div class="error-message" id="error-usuario"></div>
-        </div>
-
-        <div class="form-group">
-          <label for="login-password">Contraseña</label>
-          <input 
-            id="login-password" 
-            type="password" 
-            placeholder="Ingresa tu contraseña" 
-            autocomplete="current-password"
-          />
-          <div class="error-message" id="error-password"></div>
-        </div>
-
-        <button id="btn-login" class="btn btn-primary btn-full btn-login" type="button">
-          Iniciar Sesión
-        </button>
-
-        <div class="login-info">
-          <p class="login-info-title">📝 Credenciales de Prueba:</p>
-          <p><strong>👑 Admin:</strong> admin / 1234</p>
-          <p><strong>👤 Usuario:</strong> daniel / daniel123</p>
-          <p><strong>👨‍⚖️ Juez:</strong> juez / juez456</p>
-          <p><strong>🎯 Organizador:</strong> organizador / org789</p>
+    </div>
+  </div>
         </div>
       </form>
 
@@ -74,10 +98,11 @@
 
     <!-- TABS NAVIGATION -->
     <div class="tabs-nav">
-      <button class="tab-btn active" data-tab="inicio">📊 Dashboard</button>
-      <button class="tab-btn" data-tab="equipos">👥 Equipos</button>
-      <button class="tab-btn" data-tab="actividades">🏃 Actividades</button>
+      <button class="tab-btn active admin-only" data-tab="inicio">📊 Dashboard</button>
+      <button class="tab-btn admin-only" data-tab="equipos">👥 Equipos</button>
+      <button class="tab-btn admin-only" data-tab="actividades">🏃 Actividades</button>
       <button class="tab-btn" data-tab="puntajes">⭐ Puntajes</button>
+      <button class="tab-btn" data-tab="estadisticas">📈 Estadísticas</button>
     </div>
 
     <!-- TAB: INICIO (DASHBOARD) -->
@@ -201,6 +226,35 @@
       </div>
     </div>
 
+    <!-- TAB: ESTADÍSTICAS Y GRÁFICAS -->
+    <div class="tab-content" id="tab-estadisticas">
+      <div class="list-section">
+        <div class="list-header">
+          <h2>📈 Estadísticas y Gráficas</h2>
+          <button id="btn-refresh-stats" class="btn btn-secondary">🔄 Actualizar</button>
+        </div>
+        <div class="stats-container">
+          <!-- Gráfica de Ranking -->
+          <div class="chart-card">
+            <h3>🏆 Ranking de Equipos</h3>
+            <canvas id="chart-ranking"></canvas>
+          </div>
+          
+          <!-- Gráfica de Desempeño por Actividad -->
+          <div class="chart-card">
+            <h3>📊 Desempeño por Actividad</h3>
+            <canvas id="chart-actividades"></canvas>
+          </div>
+          
+          <!-- Tabla de Estadísticas -->
+          <div class="chart-card stats-table-card">
+            <h3>📋 Resumen de Estadísticas</h3>
+            <div id="stats-table-container"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- NOTIFICATIONS -->
     <div id="notification" class="notification hidden"></div>
 
@@ -286,6 +340,24 @@
         <div class="modal-actions">
           <button id="btn-confirmar-eliminacion" class="btn btn-danger" type="button">🗑️ Eliminar</button>
           <button class="btn btn-secondary" type="button" data-close-modal="modal-confirmar-eliminacion">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: CONFIRMAR LOGOUT -->
+    <div id="modal-confirmar-logout" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>🚪 Cerrar Sesión</h3>
+          <button class="modal-close" data-close-modal="modal-confirmar-logout">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas cerrar sesión?</p>
+          <p style="color: #0ea5e9; font-size: 0.9rem; margin-top: 1rem;">Tendrás que volver a iniciar sesión para acceder.</p>
+        </div>
+        <div class="modal-actions">
+          <button id="btn-confirmar-logout" class="btn btn-danger" type="button">🚪 Cerrar Sesión</button>
+          <button class="btn btn-secondary" type="button" data-close-modal="modal-confirmar-logout">Cancelar</button>
         </div>
       </div>
     </div>
