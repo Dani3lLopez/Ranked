@@ -42,6 +42,8 @@ function showDashboard() {
   document.getElementById('dashboard-screen').classList.remove('dashboard-hidden');
   updateDashboardTabAccess();
   updateTabsVisibility();
+  // Cargar datos del dashboard
+  init();
 }
 
 // Actualizar acceso a la tab del Dashboard basado en el rol del usuario
