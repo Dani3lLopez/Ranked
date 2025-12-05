@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import Chart from 'chart.js/auto'
 
 const SUPABASE_URL = "https://ireiyqslfctdouhakygx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0E9Wp0ELc0JUoL_qK2wWGw_ffHyFwsU";
@@ -8,10 +9,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ==================== AUTENTICACIÓN ====================
 // Credenciales estáticas de acceso
 const VALID_CREDENTIALS = [
-  { usuario: 'admin', password: '1234', rol: 'admin', nombre: 'Administrador' },
-  { usuario: 'daniel', password: 'daniel123', rol: 'usuario', nombre: 'Daniel López' },
-  { usuario: 'juez', password: 'juez456', rol: 'juez', nombre: 'Juez Principal' },
-  { usuario: 'organizador', password: 'org789', rol: 'organizador', nombre: 'Organizador de Eventos' }
+  { usuario: 'admin', password: '12345', rol: 'admin', nombre: 'Liderazgo' },
+  { usuario: 'equipo', password: 'campa2025', rol: 'user', nombre: 'Equipo' },
 ];
 
 // Variables de sesión
@@ -28,7 +27,6 @@ function checkAuthentication() {
     isAuthenticated = true;
     currentUser = { usuario: userName, rol: userRole };
     showDashboard();
-    actualizarHeaderUsuario();
   } else {
     showLoginScreen();
   }
@@ -42,6 +40,73 @@ function showLoginScreen() {
 function showDashboard() {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('dashboard-screen').classList.remove('dashboard-hidden');
+  updateDashboardTabAccess();
+  updateTabsVisibility();
+  // Cargar datos del dashboard
+  init();
+}
+
+// Actualizar acceso a la tab del Dashboard basado en el rol del usuario
+function updateDashboardTabAccess() {
+  const dashboardTabBtn = document.querySelector('[data-tab="inicio"]');
+  if (!dashboardTabBtn) return;
+  
+  if (currentUser && currentUser.rol !== 'admin') {
+    dashboardTabBtn.classList.add('disabled');
+    dashboardTabBtn.setAttribute('title', '❌ Solo administradores pueden ver el Dashboard');
+  } else {
+    dashboardTabBtn.classList.remove('disabled');
+    dashboardTabBtn.setAttribute('title', '');
+  }
+}
+
+// Desactivar opciones CRUD para usuarios no-admin
+function updateCRUDAccess() {
+  if (!currentUser || currentUser.rol === 'admin') return;
+  
+  // Desactivar botones de crear
+  const btnCrearEquipo = document.getElementById('btn-crear-equipo');
+  const btnCrearActividad = document.getElementById('btn-crear-actividad');
+  const btnGuardarPuntaje = document.getElementById('btn-guardar-puntaje');
+  
+  if (btnCrearEquipo) {
+    btnCrearEquipo.disabled = true;
+    btnCrearEquipo.classList.add('disabled-btn');
+    btnCrearEquipo.setAttribute('title', 'Solo admins pueden crear equipos');
+  }
+  if (btnCrearActividad) {
+    btnCrearActividad.disabled = true;
+    btnCrearActividad.classList.add('disabled-btn');
+    btnCrearActividad.setAttribute('title', 'Solo admins pueden crear actividades');
+  }
+  if (btnGuardarPuntaje) {
+    btnGuardarPuntaje.disabled = true;
+    btnGuardarPuntaje.classList.add('disabled-btn');
+    btnGuardarPuntaje.setAttribute('title', 'Solo admins pueden registrar puntajes');
+  }
+}
+
+// Controlar visibilidad de tabs según el rol del usuario
+function updateTabsVisibility() {
+  if (!currentUser) return;
+  
+  const adminTabs = document.querySelectorAll('.tab-btn.admin-only');
+  const puntajesTab = document.querySelector('[data-tab="puntajes"]');
+  
+  if (currentUser.rol === 'admin') {
+    // Admin: mostrar todas las tabs
+    adminTabs.forEach(tab => tab.style.display = 'block');
+    if (puntajesTab) puntajesTab.style.display = 'block';
+  } else {
+    // No-admin: ocultar tabs de admin, mostrar solo puntajes
+    adminTabs.forEach(tab => tab.style.display = 'none');
+    if (puntajesTab) puntajesTab.style.display = 'block';
+    
+    // Forzar la navegación a puntajes
+    if (!document.querySelector('[data-tab="puntajes"]').classList.contains('active')) {
+      document.querySelector('[data-tab="puntajes"]').click();
+    }
+  }
 }
 
 // Función de logout
@@ -83,50 +148,101 @@ function actualizarHeaderUsuario() {
   }
 }
 
-// Event listener para el botón de login
-document.getElementById('btn-login').addEventListener('click', async () => {
+// Función para mostrar toast en el login
+function showLoginToast(msg, timeout = 2200) {
+  if (loginNotif) {
+    loginNotif.textContent = msg;
+    loginNotif.classList.remove('hidden');
+    loginNotif.classList.add('error');
+    setTimeout(() => loginNotif.classList.add('hidden'), timeout);
+  }
+}
+
+// Función para procesar login
+async function procesarLogin() {
+  console.log('Procesando login...');
   const usuario = document.getElementById('login-usuario').value?.trim();
   const password = document.getElementById('login-password').value?.trim();
-  const errorDiv = document.getElementById('login-error');
+
+  console.log('Usuario:', usuario, 'Password:', password ? '***' : 'vacío');
 
   // Limpiar errores previos
-  errorDiv.classList.add('hidden');
-  document.getElementById('error-usuario').textContent = '';
-  document.getElementById('error-password').textContent = '';
+  const errorUsuarioEl = document.getElementById('error-usuario');
+  const errorPasswordEl = document.getElementById('error-password');
+  
+  if (errorUsuarioEl) errorUsuarioEl.textContent = '';
+  if (errorPasswordEl) errorPasswordEl.textContent = '';
 
   // Validaciones
   if (!usuario) {
-    document.getElementById('error-usuario').textContent = 'Por favor ingresa tu usuario';
+    if (errorUsuarioEl) errorUsuarioEl.textContent = 'Por favor ingresa tu usuario';
     return;
   }
 
   if (!password) {
-    document.getElementById('error-password').textContent = 'Por favor ingresa tu contraseña';
+    if (errorPasswordEl) errorPasswordEl.textContent = 'Por favor ingresa tu contraseña';
     return;
   }
 
   // Verificar credenciales
   const user = VALID_CREDENTIALS.find(cred => cred.usuario === usuario && cred.password === password);
   
+  console.log('Credenciales encontradas:', !!user);
+  
   if (user) {
     // Login exitoso
+    console.log('Login exitoso para:', user.usuario);
     sessionStorage.setItem('userToken', 'logged_in_' + Date.now());
     sessionStorage.setItem('userName', user.usuario);
     sessionStorage.setItem('userRole', user.rol);
     isAuthenticated = true;
     currentUser = user;
     showDashboard();
-    // Actualizar nombre en el header
-    actualizarHeaderUsuario();
     // Inicializar el dashboard
     init();
+    
+    // Navegar a la tab apropiada según el rol
+    if (user.rol === 'admin') {
+      // Admin va al Dashboard
+      const dashboardTab = document.querySelector('[data-tab="inicio"]');
+      if (dashboardTab) dashboardTab.click();
+    } else {
+      // No-admin va a Puntajes
+      const puntajesTab = document.querySelector('[data-tab="puntajes"]');
+      if (puntajesTab) puntajesTab.click();
+    }
   } else {
-    // Login fallido
-    errorDiv.classList.remove('hidden');
-    errorDiv.textContent = '❌ Usuario o contraseña incorrectos';
-    document.getElementById('login-password').value = '';
+    // Login fallido - mostrar toast de error
+    console.log('Login fallido');
+    showLoginToast('❌ Usuario o contraseña incorrectos');
+    if (document.getElementById('login-password')) {
+      document.getElementById('login-password').value = '';
+    }
   }
-});
+}
+
+
+// Event listener para el botón de login
+const btnLogin = document.getElementById('btn-login');
+const inputUsuario = document.getElementById('login-usuario');
+const inputPassword = document.getElementById('login-password');
+
+if (btnLogin) {
+  btnLogin.addEventListener('click', procesarLogin);
+}
+
+// Event listener para enter en los inputs de login
+if (inputUsuario) {
+  inputUsuario.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') procesarLogin();
+  });
+}
+
+if (inputPassword) {
+  inputPassword.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') procesarLogin();
+  });
+}
 
 // ==================== FIN AUTENTICACIÓN ====================
 
@@ -155,6 +271,7 @@ const btnGuardarPuntaje = document.getElementById('btn-guardar-puntaje');
 // DOM - LISTAS Y NOTIFICACIONES
 const rankingDiv = document.getElementById('ranking');
 const notif = document.getElementById('notification');
+const loginNotif = document.getElementById('login-notification');
 const equiposList = document.getElementById('equipos-list');
 const actividadesList = document.getElementById('actividades-list');
 const puntajesList = document.getElementById('puntajes-list');
@@ -163,6 +280,14 @@ const puntajesList = document.getElementById('puntajes-list');
 const btnRefreshEquipos = document.getElementById('btn-refresh-equipos');
 const btnRefreshActividades = document.getElementById('btn-refresh-actividades');
 const btnRefreshPuntajes = document.getElementById('btn-refresh-puntajes');
+const btnRefreshStats = document.getElementById('btn-refresh-stats');
+
+// DOM - ESTADÍSTICAS
+const statsTableContainer = document.getElementById('stats-table-container');
+
+// GRÁFICAS
+let chartRanking = null;
+let chartActividades = null;
 
 // TABS
 const tabBtns = document.querySelectorAll('.tab-btn');
@@ -221,6 +346,12 @@ function cerrarModal(id) {
 tabBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     const tabId = btn.dataset.tab;
+    
+    // Bloquear acceso al dashboard para no-admin
+    if (tabId === 'inicio' && currentUser && currentUser.rol !== 'admin') {
+      showError('❌ Acceso denegado: Solo administradores pueden ver el Dashboard');
+      return;
+    }
     
     // Remove active from all
     tabBtns.forEach(b => b.classList.remove('active'));
@@ -306,6 +437,8 @@ async function cargarEquipos() {
     return;
   }
 
+  const isAdminUser = currentUser && currentUser.rol === 'admin';
+
   equiposList.innerHTML = data.map(equipo => `
     <div class="item-card">
       <div class="item-name">${escapeHtml(equipo.nombre)}</div>
@@ -319,8 +452,8 @@ async function cargarEquipos() {
         </div>` : ''}
       </div>
       <div class="item-actions">
-        <button class="btn btn-edit btn-edit-equipo" data-id="${equipo.id}" data-nombre="${escapeHtml(equipo.nombre)}" data-color="${equipo.color || '#6366f1'}">✏️ Editar</button>
-        <button class="btn btn-delete btn-delete-equipo" data-id="${equipo.id}" data-nombre="${escapeHtml(equipo.nombre)}">🗑️ Eliminar</button>
+        <button class="btn btn-edit btn-edit-equipo ${!isAdminUser ? 'disabled-btn' : ''}" data-id="${equipo.id}" data-nombre="${escapeHtml(equipo.nombre)}" data-color="${equipo.color || '#6366f1'}" ${!isAdminUser ? 'disabled title="Solo admins pueden editar"' : ''}>✏️ Editar</button>
+        <button class="btn btn-delete btn-delete-equipo ${!isAdminUser ? 'disabled-btn' : ''}" data-id="${equipo.id}" data-nombre="${escapeHtml(equipo.nombre)}" ${!isAdminUser ? 'disabled title="Solo admins pueden eliminar"' : ''}>🗑️ Eliminar</button>
       </div>
     </div>
   `).join('');
@@ -328,6 +461,7 @@ async function cargarEquipos() {
   // Event listeners para editar equipos
   equiposList.querySelectorAll('.btn-edit-equipo').forEach(btn => {
     btn.addEventListener('click', function() {
+      if (!isAdminUser) return;
       const idRaw = this.getAttribute('data-id');
       const nombre = this.getAttribute('data-nombre');
       const color = this.getAttribute('data-color');
@@ -346,6 +480,7 @@ async function cargarEquipos() {
   // Event listeners para eliminar equipos
   equiposList.querySelectorAll('.btn-delete-equipo').forEach(btn => {
     btn.addEventListener('click', function() {
+      if (!isAdminUser) return;
       const id = this.getAttribute('data-id');
       const nombre = this.getAttribute('data-nombre');
       deletingItemKey = { type: 'equipo', id, nombre }; // NO usar parseInt
@@ -413,6 +548,8 @@ async function cargarActividades() {
     return;
   }
 
+  const isAdminUser = currentUser && currentUser.rol === 'admin';
+
   actividadesList.innerHTML = data.map(act => `
     <div class="item-card">
       <div class="item-name">${escapeHtml(act.nombre)}</div>
@@ -423,8 +560,8 @@ async function cargarActividades() {
         </div>
       </div>
       <div class="item-actions">
-        <button class="btn btn-edit btn-edit-actividad" data-id="${act.id}" data-nombre="${escapeHtml(act.nombre)}" data-max="${act.maxima_puntuacion}">✏️ Editar</button>
-        <button class="btn btn-delete btn-delete-actividad" data-id="${act.id}" data-nombre="${escapeHtml(act.nombre)}">🗑️ Eliminar</button>
+        <button class="btn btn-edit btn-edit-actividad ${!isAdminUser ? 'disabled-btn' : ''}" data-id="${act.id}" data-nombre="${escapeHtml(act.nombre)}" data-max="${act.maxima_puntuacion}" ${!isAdminUser ? 'disabled title="Solo admins pueden editar"' : ''}>✏️ Editar</button>
+        <button class="btn btn-delete btn-delete-actividad ${!isAdminUser ? 'disabled-btn' : ''}" data-id="${act.id}" data-nombre="${escapeHtml(act.nombre)}" ${!isAdminUser ? 'disabled title="Solo admins pueden eliminar"' : ''}>🗑️ Eliminar</button>
       </div>
     </div>
   `).join('');
@@ -432,6 +569,7 @@ async function cargarActividades() {
   // Event listeners para editar actividades
   actividadesList.querySelectorAll('.btn-edit-actividad').forEach(btn => {
     btn.addEventListener('click', function() {
+      if (!isAdminUser) return;
       const idRaw = this.getAttribute('data-id');
       const nombre = this.getAttribute('data-nombre');
       const maxRaw = this.getAttribute('data-max');
@@ -450,6 +588,7 @@ async function cargarActividades() {
   // Event listeners para eliminar actividades
   actividadesList.querySelectorAll('.btn-delete-actividad').forEach(btn => {
     btn.addEventListener('click', function() {
+      if (!isAdminUser) return;
       const id = this.getAttribute('data-id');
       const nombre = this.getAttribute('data-nombre');
       deletingItemKey = { type: 'actividad', id, nombre }; // NO usar parseInt
@@ -519,6 +658,8 @@ async function cargarPuntajes() {
     return;
   }
 
+  const isAdminUser = currentUser && currentUser.rol === 'admin';
+
   // Agrupar puntajes por actividad
   const puntajesPorActividad = {};
   data.forEach(puntaje => {
@@ -561,8 +702,8 @@ async function cargarPuntajes() {
               <div class="score-value">
                 <span class="score-points">${puntaje.puntos} pts</span>
                 <div class="score-actions">
-                  <button class="btn btn-edit" data-equipo="${equipoId}" data-actividad="${actividadId}" data-puntos="${puntos}">✏️</button>
-                  <button class="btn btn-delete" data-equipo="${equipoId}" data-actividad="${actividadId}">🗑️</button>
+                  <button class="btn btn-edit ${!isAdminUser ? 'disabled-btn' : ''}" data-equipo="${equipoId}" data-actividad="${actividadId}" data-puntos="${puntos}" ${!isAdminUser ? 'disabled title="Solo admins pueden editar"' : ''}>✏️</button>
+                  <button class="btn btn-delete ${!isAdminUser ? 'disabled-btn' : ''}" data-equipo="${equipoId}" data-actividad="${actividadId}" ${!isAdminUser ? 'disabled title="Solo admins pueden eliminar"' : ''}>🗑️</button>
                 </div>
               </div>
             </div>
@@ -578,6 +719,7 @@ async function cargarPuntajes() {
   // Event listeners para botones de editar/eliminar puntajes
   puntajesList.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', function(e) {
+      if (!isAdminUser) return;
       e.preventDefault();
       const equipoId = this.getAttribute('data-equipo');
       const actividadId = this.getAttribute('data-actividad');
@@ -595,6 +737,7 @@ async function cargarPuntajes() {
 
   puntajesList.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', function(e) {
+      if (!isAdminUser) return;
       e.preventDefault();
       const equipoId = this.getAttribute('data-equipo');
       const actividadId = this.getAttribute('data-actividad');
@@ -698,7 +841,162 @@ async function cargarRanking() {
   await cargarStats();
 }
 
-// Confirmar eliminación (equipos, actividades o puntajes)
+// Cargar Estadísticas y Gráficas
+async function cargarEstadisticas() {
+  try {
+    // Obtener ranking
+    const { data: ranking, error: rankingError } = await supabase
+      .from('vw_ranking_equipos')
+      .select('*')
+      .order('total_puntos', { ascending: false });
+
+    if (rankingError) throw rankingError;
+
+    // Obtener puntajes por equipo y actividad
+    const { data: puntajes, error: puntajesError } = await supabase
+      .from('puntajes')
+      .select('equipo_id, actividad_id, puntos, equipos(nombre, color), actividades(nombre)');
+
+    if (puntajesError) throw puntajesError;
+
+    // ===== GRÁFICA 1: RANKING DE EQUIPOS =====
+    if (ranking && ranking.length > 0) {
+      const ctxRanking = document.getElementById('chart-ranking').getContext('2d');
+      
+      if (chartRanking) chartRanking.destroy();
+      
+      chartRanking = new Chart(ctxRanking, {
+        type: 'bar',
+        data: {
+          labels: ranking.map(r => escapeHtml(r.nombre)),
+          datasets: [{
+            label: 'Puntos Totales',
+            data: ranking.map(r => r.total_puntos),
+            backgroundColor: ranking.map(r => r.color || '#6366f1'),
+            borderColor: ranking.map(r => r.color || '#6366f1'),
+            borderWidth: 2,
+            borderRadius: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          indexAxis: 'y',
+          plugins: {
+            legend: {
+              display: true,
+              labels: { color: '#cbd5e1', font: { size: 12 } }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#cbd5e1' },
+              grid: { color: 'rgba(100, 116, 139, 0.1)' }
+            },
+            y: {
+              ticks: { color: '#cbd5e1' },
+              grid: { color: 'rgba(100, 116, 139, 0.1)' }
+            }
+          }
+        }
+      });
+    }
+
+    // ===== GRÁFICA 2: DESEMPEÑO POR ACTIVIDAD =====
+    if (puntajes && puntajes.length > 0) {
+      // Agrupar puntajes por actividad
+      const puntajePorActividad = {};
+      puntajes.forEach(p => {
+        const actName = p.actividades.nombre;
+        if (!puntajePorActividad[actName]) {
+          puntajePorActividad[actName] = 0;
+        }
+        puntajePorActividad[actName] += p.puntos;
+      });
+
+      const ctxActividades = document.getElementById('chart-actividades').getContext('2d');
+      
+      if (chartActividades) chartActividades.destroy();
+      
+      chartActividades = new Chart(ctxActividades, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(puntajePorActividad),
+          datasets: [{
+            data: Object.values(puntajePorActividad),
+            backgroundColor: [
+              '#6366f1', '#0ea5e9', '#f59e0b', '#ef4444',
+              '#10b981', '#ec4899', '#8b5cf6', '#06b6d4'
+            ],
+            borderColor: '#1e293b',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#cbd5e1', font: { size: 12 }, padding: 15 }
+            }
+          }
+        }
+      });
+    }
+
+    // ===== TABLA DE ESTADÍSTICAS =====
+    if (ranking && ranking.length > 0) {
+      let tableHtml = `
+        <table class="stats-table">
+          <thead>
+            <tr>
+              <th>Posición</th>
+              <th>Equipo</th>
+              <th>Puntos</th>
+              <th>Actividades</th>
+              <th>Promedio</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      ranking.forEach((r, idx) => {
+        const promedio = r.actividades_participadas > 0 
+          ? (r.total_puntos / r.actividades_participadas).toFixed(2)
+          : '0.00';
+        
+        tableHtml += `
+          <tr>
+            <td class="pos-${idx + 1}">
+              ${idx + 1 === 1 ? '🥇' : idx + 1 === 2 ? '🥈' : idx + 1 === 3 ? '🥉' : idx + 1}
+            </td>
+            <td>
+              <div style="display:flex;gap:8px;align-items:center;">
+                ${r.color ? `<div style="width:12px;height:12px;background:${escapeHtml(r.color)};border-radius:3px;"></div>` : ''}
+                <strong>${escapeHtml(r.nombre)}</strong>
+              </div>
+            </td>
+            <td><strong>${r.total_puntos}</strong></td>
+            <td>${r.actividades_participadas}</td>
+            <td>${promedio} pts/act</td>
+          </tr>
+        `;
+      });
+
+      tableHtml += `
+          </tbody>
+        </table>
+      `;
+
+      statsTableContainer.innerHTML = tableHtml;
+    }
+
+  } catch (err) {
+    console.error('Error cargando estadísticas:', err);
+    statsTableContainer.innerHTML = `<p style="color: #ef4444;">Error cargando estadísticas: ${escapeHtml(err.message)}</p>`;
+  }
+}
 document.getElementById('btn-confirmar-eliminacion').addEventListener('click', async () => {
   if (!deletingItemKey) return showError('ID no encontrado');
   
@@ -745,6 +1043,7 @@ document.querySelectorAll('[data-close-modal]').forEach(btn => {
 btnRefreshEquipos.addEventListener('click', cargarEquipos);
 btnRefreshActividades.addEventListener('click', cargarActividades);
 btnRefreshPuntajes.addEventListener('click', cargarPuntajes);
+btnRefreshStats.addEventListener('click', cargarEstadisticas);
 
 // ==================== INIT ====================
 
@@ -756,6 +1055,10 @@ async function init() {
     await cargarActividades();
     await cargarPuntajes();
     await cargarStats();
+    await cargarEstadisticas();
+    // Actualizar acceso según el rol
+    updateCRUDAccess();
+    updateTabsVisibility();
   } catch (err) {
     console.error('Init error', err);
   }
@@ -765,8 +1068,32 @@ async function init() {
 checkAuthentication();
 
 // Event listener para logout
-document.getElementById('btn-logout').addEventListener('click', () => {
-  if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+const btnLogout = document.getElementById('btn-logout');
+if (btnLogout) {
+  btnLogout.addEventListener('click', () => {
+    abrirModal('modal-confirmar-logout');
+  });
+}
+
+// Event listener para confirmar logout
+const btnConfirmarLogout = document.getElementById('btn-confirmar-logout');
+if (btnConfirmarLogout) {
+  btnConfirmarLogout.addEventListener('click', () => {
+    cerrarModal('modal-confirmar-logout');
     logout();
-  }
+  });
+}
+
+// Event listener para redimensionar gráficos en responsive
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    if (chartRanking) {
+      chartRanking.resize();
+    }
+    if (chartActividades) {
+      chartActividades.resize();
+    }
+  }, 250);
 });
