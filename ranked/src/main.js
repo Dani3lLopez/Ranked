@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import Chart from 'chart.js/auto'
+import { syncPending } from "./sync.js";
+import { downloadFullData } from "./sync.js";
 
 const SUPABASE_URL = "https://ireiyqslfctdouhakygx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0E9Wp0ELc0JUoL_qK2wWGw_ffHyFwsU";
@@ -1097,3 +1099,15 @@ window.addEventListener('resize', () => {
     }
   }, 250);
 });
+
+// Sincronizar cuando vuelva internet
+window.addEventListener("online", () => {
+  console.log("🌐 Conexión restaurada → sincronizando");
+  syncPending();
+});
+
+// Intento cada 10 segundos también
+setInterval(syncPending, 10000);
+
+// Cargar datos desde Supabase cuando haya red
+downloadFullData();

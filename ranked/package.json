@@ -16,6 +16,7 @@
     "@supabase/supabase-js": "^2.86.2",
     "@tailwindcss/vite": "^4.1.17",
     "chart.js": "^4.5.1",
+    "idb": "^8.0.3",
     "tailwindcss": "^4.1.17"
   }
 }
