@@ -440,23 +440,47 @@ async function cargarEquipos() {
   const isAdminUser = currentUser && currentUser.rol === 'admin';
 
   equiposList.innerHTML = data.map(equipo => `
-    <div class="item-card">
-      <div class="item-name">${escapeHtml(equipo.nombre)}</div>
-      <div class="item-details">
-        ${equipo.color ? `<div class="item-detail-row">
+  <div class="item-card">
+    <div class="item-name">${escapeHtml(equipo.nombre)}</div>
+    <div class="item-details">
+      <!-- REPRESENTANTE -->
+      ${equipo.representante ? `
+        <div class="item-detail-row">
+          <span class="item-detail-label">Representante:</span>
+          <span>${escapeHtml(equipo.representante)}</span>
+        </div>
+      ` : ''}
+      <!-- COLOR -->
+      ${equipo.color ? `
+        <div class="item-detail-row">
           <span class="item-detail-label">Color:</span>
           <div style="display:flex;gap:8px;align-items:center;">
             <div style="width:16px;height:16px;background:${escapeHtml(equipo.color)};border-radius:3px;"></div>
             <span>${escapeHtml(getColorName(equipo.color))}</span>
           </div>
-        </div>` : ''}
-      </div>
-      <div class="item-actions">
-        <button class="btn btn-edit btn-edit-equipo ${!isAdminUser ? 'disabled-btn' : ''}" data-id="${equipo.id}" data-nombre="${escapeHtml(equipo.nombre)}" data-color="${equipo.color || '#6366f1'}" ${!isAdminUser ? 'disabled title="Solo admins pueden editar"' : ''}>✏️ Editar</button>
-        <button class="btn btn-delete btn-delete-equipo ${!isAdminUser ? 'disabled-btn' : ''}" data-id="${equipo.id}" data-nombre="${escapeHtml(equipo.nombre)}" ${!isAdminUser ? 'disabled title="Solo admins pueden eliminar"' : ''}>🗑️ Eliminar</button>
-      </div>
+        </div>
+      ` : ''}
     </div>
-  `).join('');
+    <div class="item-actions">
+      <button class="btn btn-edit btn-edit-equipo ${!isAdminUser ? 'disabled-btn' : ''}"
+        data-id="${equipo.id}"
+        data-nombre="${escapeHtml(equipo.nombre)}"
+        data-color="${equipo.color || '#6366f1'}"
+        data-representante="${escapeHtml(equipo.representante || '')}"
+        ${!isAdminUser ? 'disabled title="Solo admins pueden editar"' : ''}>
+        ✏️ Editar
+      </button>
+
+      <button class="btn btn-delete btn-delete-equipo ${!isAdminUser ? 'disabled-btn' : ''}"
+        data-id="${equipo.id}"
+        data-nombre="${escapeHtml(equipo.nombre)}"
+        ${!isAdminUser ? 'disabled title="Solo admins pueden eliminar"' : ''}>
+        🗑️ Eliminar
+      </button>
+    </div>
+  </div>
+`).join('');
+
 
   // Event listeners para editar equipos
   equiposList.querySelectorAll('.btn-edit-equipo').forEach(btn => {
@@ -464,14 +488,16 @@ async function cargarEquipos() {
       if (!isAdminUser) return;
       const idRaw = this.getAttribute('data-id');
       const nombre = this.getAttribute('data-nombre');
+      const representante = this.getAttribute('data-representante');
       const color = this.getAttribute('data-color');
       
-      console.log('Raw equipo data:', { idRaw, nombre, color });
+      console.log('Raw equipo data:', { idRaw, nombre, representante, color });
       
       editingEquipoId = idRaw; // NO usar parseInt, es un UUID
       console.log('Parsed equipo ID:', { editingEquipoId, tipo: typeof editingEquipoId });
       
       document.getElementById('edit-equipo-nombre').value = nombre;
+      document.getElementById('edit-equipo-representante').value = representante;
       document.getElementById('edit-equipo-color').value = color;
       abrirModal('modal-editar-equipo');
     });
@@ -492,16 +518,18 @@ async function cargarEquipos() {
 
 document.getElementById('btn-guardar-edicion-equipo').addEventListener('click', async () => {
   const nombre = document.getElementById('edit-equipo-nombre').value?.trim();
+  const representante = document.getElementById('edit-equipo-representante').value?.trim();
   const color = document.getElementById('edit-equipo-color').value?.trim() || null;
 
   if (!nombre) return showError('Ingresa nombre de equipo');
+  if (!representante) return showError('Ingresa representante de equipo');
   if (!editingEquipoId) return showError('ID no encontrado');
 
-  console.log('Guardando equipo con:', { editingEquipoId, tipo: typeof editingEquipoId, nombre, color });
+  console.log('Guardando equipo con:', { editingEquipoId, tipo: typeof editingEquipoId, nombre, representante, color });
 
   const { error } = await supabase
     .from('equipos')
-    .update({ nombre, color })
+    .update({ nombre, representante, color })
     .eq('id', editingEquipoId);
 
   if (error) return showError('Error actualizando: ' + error.message);
