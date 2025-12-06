@@ -1,7 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import Chart from 'chart.js/auto'
-import { syncPending } from "./sync.js";
-import { downloadFullData } from "./sync.js";
+import Chart from 'chart.js/auto';
 
 const SUPABASE_URL = "https://ireiyqslfctdouhakygx.supabase.co";
 const SUPABASE_KEY = "sb_publishable_0E9Wp0ELc0JUoL_qK2wWGw_ffHyFwsU";
@@ -11,8 +9,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ==================== AUTENTICACIÓN ====================
 // Credenciales estáticas de acceso
 const VALID_CREDENTIALS = [
-  { usuario: 'admin', password: '12345', rol: 'admin', nombre: 'Liderazgo' },
-  { usuario: 'equipo', password: 'campa2025', rol: 'user', nombre: 'Equipo' },
+  { usuario: 'lider', password: '12345', rol: 'admin', nombre: 'Liderazgo' },
+  { usuario: 'juventud', password: 'campa2025', rol: 'user', nombre: 'Equipo' },
 ];
 
 // Variables de sesión
@@ -1099,15 +1097,3 @@ window.addEventListener('resize', () => {
     }
   }, 250);
 });
-
-// Sincronizar cuando vuelva internet
-window.addEventListener("online", () => {
-  console.log("🌐 Conexión restaurada → sincronizando");
-  syncPending();
-});
-
-// Intento cada 10 segundos también
-setInterval(syncPending, 10000);
-
-// Cargar datos desde Supabase cuando haya red
-downloadFullData();
