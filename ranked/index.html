@@ -1,18 +1,23 @@
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="icon" href="/imgs/naranja.png" type="image/png" />
   <title>Ranked</title>
   <link rel="stylesheet" href="src/style.css" />
 </head>
+
 <body class="bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white min-h-screen">
   <!-- LOGIN SCREEN -->
   <div id="login-screen" class="login-container">
     <!-- Toast de notificación en login -->
     <div id="login-notification" class="notification login-notification hidden"></div>
-    
+
     <!-- Fondo animado -->
     <div class="login-background">
       <div class="blob blob-1"></div>
@@ -35,11 +40,7 @@
           <div class="form-group">
             <div class="input-wrapper">
               <span class="input-icon">👤</span>
-              <input 
-                id="login-usuario" 
-                type="text" 
-                placeholder="Usuario" 
-              />
+              <input id="login-usuario" type="text" placeholder="Usuario" />
             </div>
             <div class="error-message" id="error-usuario"></div>
           </div>
@@ -48,11 +49,7 @@
           <div class="form-group">
             <div class="input-wrapper">
               <span class="input-icon">🔒</span>
-              <input 
-                id="login-password" 
-                type="password" 
-                placeholder="Contraseña" 
-              />
+              <input id="login-password" type="password" placeholder="Contraseña" />
             </div>
             <div class="error-message" id="error-password"></div>
           </div>
@@ -71,299 +68,307 @@
       </div>
     </div>
   </div>
-        </div>
-      </form>
+  </div>
+  </form>
 
-      <div id="login-error" class="login-error hidden"></div>
-    </div>
+  <div id="login-error" class="login-error hidden"></div>
+  </div>
   </div>
 
   <!-- MAIN DASHBOARD -->
   <div id="dashboard-screen" class="dashboard-hidden">
-  <main class="container">
-    <!-- HEADER -->
-    <header class="header">
-      <div class="header-content">
-        <div>
-          <h1>🏆 Ranked</h1>
-          <p class="subtitle">Sistema de gestión de puntuaciones en tiempo real</p>
+    <main class="container">
+      <!-- HEADER -->
+      <header class="header">
+        <div class="header-content">
+          <div>
+            <h1>🏆 Ranked</h1>
+            <p class="subtitle">Sistema de gestión de puntuaciones en tiempo real</p>
+          </div>
+          <button id="btn-logout" class="btn btn-danger" style="margin-top: 0;">🚪 Salir</button>
         </div>
-        <button id="btn-logout" class="btn btn-danger" style="margin-top: 0;">🚪 Salir</button>
+      </header>
+
+      <!-- STATISTICS DASHBOARD -->
+      <div id="stats-header" class="stats-dashboard"></div>
+
+      <!-- TABS NAVIGATION -->
+      <div class="tabs-nav">
+        <button class="tab-btn active admin-only" data-tab="inicio">📊 Dashboard</button>
+        <button class="tab-btn admin-only" data-tab="equipos">👥 Equipos</button>
+        <button class="tab-btn admin-only" data-tab="actividades">🏃 Actividades</button>
+        <button class="tab-btn" data-tab="puntajes">⭐ Puntajes</button>
+        <button class="tab-btn" data-tab="estadisticas">📈 Estadísticas</button>
       </div>
-    </header>
 
-    <!-- STATISTICS DASHBOARD -->
-    <div id="stats-header" class="stats-dashboard"></div>
+      <!-- TAB: INICIO (DASHBOARD) -->
+      <div class="tab-content active" id="tab-inicio">
+        <!-- RANKING SECTION -->
+        <section class="ranking-section">
+          <div class="ranking-header">
+            <h2>🥇 Ranking de Equipos</h2>
+            <p class="ranking-subtitle">Clasificación en tiempo real</p>
+          </div>
+          <div id="ranking" class="ranking-container"></div>
+        </section>
 
-    <!-- TABS NAVIGATION -->
-    <div class="tabs-nav">
-      <button class="tab-btn active admin-only" data-tab="inicio">📊 Dashboard</button>
-      <button class="tab-btn admin-only" data-tab="equipos">👥 Equipos</button>
-      <button class="tab-btn admin-only" data-tab="actividades">🏃 Actividades</button>
-      <button class="tab-btn" data-tab="puntajes">⭐ Puntajes</button>
-      <button class="tab-btn" data-tab="estadisticas">📈 Estadísticas</button>
-    </div>
+        <!-- CREAR REGISTROS -->
+        <div class="create-section">
+          <div class="section-title">📝 Crear Nuevos Registros</div>
 
-    <!-- TAB: INICIO (DASHBOARD) -->
-    <div class="tab-content active" id="tab-inicio">
-      <!-- RANKING SECTION -->
-      <section class="ranking-section">
-        <div class="ranking-header">
-          <h2>🥇 Ranking de Equipos</h2>
-          <p class="ranking-subtitle">Clasificación en tiempo real</p>
-        </div>
-        <div id="ranking" class="ranking-container"></div>
-      </section>
-
-      <!-- CREAR REGISTROS -->
-      <div class="create-section">
-        <div class="section-title">📝 Crear Nuevos Registros</div>
-        
-        <div class="grid-create">
-          <!-- Crear Equipo -->
-          <div class="form-card">
-            <div class="form-header">
-              <h3>👥 Nuevo Equipo</h3>
-            </div>
-            <form onsubmit="return false">
-              <div class="form-group">
-                <label for="equipo-nombre">Nombre</label>
-                <input id="equipo-nombre" type="text" placeholder="Ej: Equipo Rojo" />
+          <div class="grid-create">
+            <!-- Crear Equipo -->
+            <div class="form-card">
+              <div class="form-header">
+                <h3>👥 Nuevo Equipo</h3>
               </div>
-              <div class="form-group">
-                <label for="equipo-representante">Representante</label>
-                <input id="equipo-representante" type="text" placeholder="Ej: Juan Pérez" />
-              </div>
-              <div class="form-group">
-                <label for="equipo-color">Color</label>
-                <div class="color-input-group">
-                  <input id="equipo-color" type="color" value="#6366f1" />
-                  <span id="color-preview" class="color-preview">Indigo</span>
+              <form onsubmit="return false">
+                <div class="form-group">
+                  <label for="equipo-nombre">Nombre</label>
+                  <input id="equipo-nombre" type="text" placeholder="Ej: Equipo Rojo" />
                 </div>
-              </div>
-              <button id="btn-crear-equipo" class="btn btn-primary btn-full" type="button">Crear equipo</button>
-            </form>
-          </div>
-
-          <!-- Crear Actividad -->
-          <div class="form-card">
-            <div class="form-header">
-              <h3>🏃 Nueva Actividad</h3>
+                <div class="form-group">
+                  <label for="equipo-representante">Representante</label>
+                  <input id="equipo-representante" type="text" placeholder="Ej: Juan Pérez" />
+                </div>
+                <div class="form-group">
+                  <label for="equipo-color">Color</label>
+                  <div class="color-input-group">
+                    <input id="equipo-color" type="color" value="#6366f1" />
+                    <span id="color-preview" class="color-preview">Indigo</span>
+                  </div>
+                </div>
+                <button id="btn-crear-equipo" class="btn btn-primary btn-full" type="button">Crear equipo</button>
+              </form>
             </div>
-            <form onsubmit="return false">
-              <div class="form-group">
-                <label for="actividad-nombre">Nombre</label>
-                <input id="actividad-nombre" type="text" placeholder="Ej: Carrera 100m" />
-              </div>
-              <div class="form-group">
-                <label for="actividad-min">Puntuación mínima</label>
-                <input id="actividad-min" placeholder="0" value="0" min="0" />
-              </div>
-              <div class="form-group">
-                <label for="actividad-max">Puntuación máxima</label>
-                <input id="actividad-max" placeholder="100" value="100" min="1" />
-              </div>
-              <button id="btn-crear-actividad" class="btn btn-secondary btn-full" type="button">Crear actividad</button>
-            </form>
-          </div>
 
-          <!-- Registrar Puntaje -->
-          <div class="form-card">
-            <div class="form-header">
-              <h3>⭐ Registrar Puntaje</h3>
+            <!-- Crear Actividad -->
+            <div class="form-card">
+              <div class="form-header">
+                <h3>🏃 Nueva Actividad</h3>
+              </div>
+              <form onsubmit="return false">
+                <div class="form-group">
+                  <label for="actividad-nombre">Nombre</label>
+                  <input id="actividad-nombre" type="text" placeholder="Ej: Carrera 100m" />
+                </div>
+                <div class="form-group">
+                  <label for="actividad-min">Puntuación mínima</label>
+                  <input id="actividad-min" placeholder="0" value="0" min="0" />
+                </div>
+                <div class="form-group">
+                  <label for="actividad-max">Puntuación máxima</label>
+                  <input id="actividad-max" placeholder="100" value="100" min="1" />
+                </div>
+                <button id="btn-crear-actividad" class="btn btn-secondary btn-full" type="button">Crear
+                  actividad</button>
+              </form>
             </div>
-            <form onsubmit="return false">
-              <div class="form-group">
-                <label for="puntaje-equipo">Equipo</label>
-                <select id="puntaje-equipo"></select>
+
+            <!-- Registrar Puntaje -->
+            <div class="form-card">
+              <div class="form-header">
+                <h3>⭐ Registrar Puntaje</h3>
               </div>
-              <div class="form-group">
-                <label for="puntaje-actividad">Actividad</label>
-                <select id="puntaje-actividad"></select>
-              </div>
-              <div class="form-group">
-                <label for="puntaje-puntos">Puntos</label>
-                <input id="puntaje-puntos" type="number" placeholder="0" min="0" />
-              </div>
-              <button id="btn-guardar-puntaje" class="btn btn-accent btn-full" type="button">Guardar puntaje</button>
-            </form>
+              <form onsubmit="return false">
+                <div class="form-group">
+                  <label for="puntaje-equipo">Equipo</label>
+                  <select id="puntaje-equipo"></select>
+                </div>
+                <div class="form-group">
+                  <label for="puntaje-actividad">Actividad</label>
+                  <select id="puntaje-actividad"></select>
+                </div>
+                <div class="form-group">
+                  <label for="puntaje-puntos">Puntos</label>
+                  <input id="puntaje-puntos" type="number" placeholder="0" min="0" />
+                </div>
+                <button id="btn-guardar-puntaje" class="btn btn-accent btn-full" type="button">Guardar puntaje</button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- TAB: EQUIPOS -->
-    <div class="tab-content" id="tab-equipos">
-      <div class="list-section">
-        <div class="list-header">
-          <h2>👥 Gestión de Equipos</h2>
-          <button id="btn-refresh-equipos" class="btn btn-secondary">🔄 Actualizar</button>
-        </div>
-        <div id="equipos-list" class="items-list"></div>
-      </div>
-    </div>
-
-    <!-- TAB: ACTIVIDADES -->
-    <div class="tab-content" id="tab-actividades">
-      <div class="list-section">
-        <div class="list-header">
-          <h2>🏃 Gestión de Actividades</h2>
-          <button id="btn-refresh-actividades" class="btn btn-secondary">🔄 Actualizar</button>
-        </div>
-        <div id="actividades-list" class="items-list"></div>
-      </div>
-    </div>
-
-    <!-- TAB: PUNTAJES -->
-    <div class="tab-content" id="tab-puntajes">
-      <div class="list-section">
-        <div class="list-header">
-          <h2>⭐ Gestión de Puntajes por Actividad</h2>
-          <button id="btn-refresh-puntajes" class="btn btn-secondary">🔄 Actualizar</button>
-        </div>
-        <div id="puntajes-list" class="puntajes-by-activity"></div>
-      </div>
-    </div>
-
-    <!-- TAB: ESTADÍSTICAS Y GRÁFICAS -->
-    <div class="tab-content" id="tab-estadisticas">
-      <div class="list-section">
-        <div class="list-header">
-          <h2>📈 Estadísticas y Gráficas</h2>
-          <button id="btn-refresh-stats" class="btn btn-secondary">🔄 Actualizar</button>
-        </div>
-        <div class="stats-container">
-          <!-- Gráfica de Ranking -->
-          <div class="chart-card">
-            <h3>🏆 Ranking de Equipos</h3>
-            <canvas id="chart-ranking"></canvas>
+      <!-- TAB: EQUIPOS -->
+      <div class="tab-content" id="tab-equipos">
+        <div class="list-section">
+          <div class="list-header">
+            <h2>👥 Gestión de Equipos</h2>
+            <button id="btn-refresh-equipos" class="btn btn-secondary">🔄 Actualizar</button>
           </div>
-          
-          <!-- Gráfica de Desempeño por Actividad -->
-          <div class="chart-card">
-            <h3>📊 Desempeño por Actividad</h3>
-            <canvas id="chart-actividades"></canvas>
-          </div>
-          
-          <!-- Tabla de Estadísticas -->
-          <div class="chart-card stats-table-card">
-            <h3>📋 Resumen de Estadísticas</h3>
-            <div id="stats-table-container"></div>
-          </div>
+          <div id="equipos-list" class="items-list"></div>
         </div>
       </div>
-    </div>
 
-    <!-- NOTIFICATIONS -->
-    <div id="notification" class="notification hidden"></div>
-
-    <!-- MODAL: EDITAR EQUIPO -->
-    <div id="modal-editar-equipo" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Editar Equipo</h3>
-          <button class="modal-close" data-close-modal="modal-editar-equipo">&times;</button>
-        </div>
-        <form onsubmit="return false">
-          <div class="form-group">
-            <label for="edit-equipo-nombre">Nombre</label>
-            <input id="edit-equipo-nombre" type="text" />
+      <!-- TAB: ACTIVIDADES -->
+      <div class="tab-content" id="tab-actividades">
+        <div class="list-section">
+          <div class="list-header">
+            <h2>🏃 Gestión de Actividades</h2>
+            <button id="btn-refresh-actividades" class="btn btn-secondary">🔄 Actualizar</button>
           </div>
-          <div class="form-group">
-            <label for="edit-equipo-color">Color</label>
-            <input id="edit-equipo-color" type="color" />
+          <div id="actividades-list" class="items-list"></div>
+        </div>
+      </div>
+
+      <!-- TAB: PUNTAJES -->
+      <div class="tab-content" id="tab-puntajes">
+        <div class="list-section">
+          <div class="list-header">
+            <h2>⭐ Gestión de Puntajes por Actividad</h2>
+            <button id="btn-refresh-puntajes" class="btn btn-secondary">🔄 Actualizar</button>
+          </div>
+          <div id="puntajes-list" class="puntajes-by-activity"></div>
+        </div>
+      </div>
+
+      <!-- TAB: ESTADÍSTICAS Y GRÁFICAS -->
+      <div class="tab-content" id="tab-estadisticas">
+        <div class="list-section">
+          <div class="list-header">
+            <h2>📈 Estadísticas y Gráficas</h2>
+            <button id="btn-refresh-stats" class="btn btn-secondary">🔄 Actualizar</button>
+          </div>
+          <div class="stats-container">
+            <!-- Gráfica de Ranking -->
+            <div class="chart-card">
+              <h3>🏆 Ranking de Equipos</h3>
+              <canvas id="chart-ranking"></canvas>
+            </div>
+
+            <!-- Gráfica de Desempeño por Actividad -->
+            <div class="chart-card">
+              <h3>📊 Desempeño por Actividad</h3>
+              <canvas id="chart-actividades"></canvas>
+            </div>
+
+            <!-- Tabla de Estadísticas -->
+            <div class="chart-card stats-table-card">
+              <h3>📋 Resumen de Estadísticas</h3>
+              <div id="stats-table-container"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div id="notification" class="notification hidden"></div>
+
+      <!-- MODAL: EDITAR EQUIPO -->
+      <div id="modal-editar-equipo" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Editar Equipo</h3>
+            <button class="modal-close" data-close-modal="modal-editar-equipo">&times;</button>
+          </div>
+          <form onsubmit="return false">
+            <div class="form-group">
+              <label for="edit-equipo-nombre">Nombre</label>
+              <input id="edit-equipo-nombre" type="text" />
+            </div>
+            <div class="form-group">
+              <label for="edit-equipo-color">Color</label>
+              <input id="edit-equipo-color" type="color" />
+            </div>
+            <div class="modal-actions">
+              <button id="btn-guardar-edicion-equipo" class="btn btn-primary" type="button">Guardar</button>
+              <button class="btn btn-secondary" type="button" data-close-modal="modal-editar-equipo">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- MODAL: EDITAR ACTIVIDAD -->
+      <div id="modal-editar-actividad" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Editar Actividad</h3>
+            <button class="modal-close" data-close-modal="modal-editar-actividad">&times;</button>
+          </div>
+          <form onsubmit="return false">
+            <div class="form-group">
+              <label for="edit-actividad-nombre">Nombre</label>
+              <input id="edit-actividad-nombre" type="text" />
+            </div>
+            <div class="form-group">
+              <label for="edit-actividad-max">Puntuación máxima</label>
+              <input id="edit-actividad-max" type="number" min="1" />
+            </div>
+            <div class="modal-actions">
+              <button id="btn-guardar-edicion-actividad" class="btn btn-primary" type="button">Guardar</button>
+              <button class="btn btn-secondary" type="button"
+                data-close-modal="modal-editar-actividad">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- MODAL: EDITAR PUNTAJE -->
+      <div id="modal-editar-puntaje" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Editar Puntaje</h3>
+            <button class="modal-close" data-close-modal="modal-editar-puntaje">&times;</button>
+          </div>
+          <form onsubmit="return false">
+            <div class="form-group">
+              <label for="edit-puntaje-puntos">Puntos</label>
+              <input id="edit-puntaje-puntos" type="number" />
+            </div>
+            <div class="modal-actions">
+              <button id="btn-guardar-edicion-puntaje" class="btn btn-primary" type="button">Guardar</button>
+              <button class="btn btn-secondary" type="button" data-close-modal="modal-editar-puntaje">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- MODAL: CONFIRMAR ELIMINACIÓN -->
+      <div id="modal-confirmar-eliminacion" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>⚠️ Confirmar Eliminación</h3>
+            <button class="modal-close" data-close-modal="modal-confirmar-eliminacion">&times;</button>
+          </div>
+          <div class="modal-body">
+            <p id="modal-eliminar-mensaje">¿Estás seguro de que deseas eliminar este elemento?</p>
+            <p style="color: #ef4444; font-size: 0.9rem; margin-top: 1rem;">Esta acción no se puede deshacer.</p>
           </div>
           <div class="modal-actions">
-            <button id="btn-guardar-edicion-equipo" class="btn btn-primary" type="button">Guardar</button>
-            <button class="btn btn-secondary" type="button" data-close-modal="modal-editar-equipo">Cancelar</button>
+            <button id="btn-confirmar-eliminacion" class="btn btn-danger" type="button">🗑️ Eliminar</button>
+            <button class="btn btn-secondary" type="button"
+              data-close-modal="modal-confirmar-eliminacion">Cancelar</button>
           </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- MODAL: EDITAR ACTIVIDAD -->
-    <div id="modal-editar-actividad" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Editar Actividad</h3>
-          <button class="modal-close" data-close-modal="modal-editar-actividad">&times;</button>
         </div>
-        <form onsubmit="return false">
-          <div class="form-group">
-            <label for="edit-actividad-nombre">Nombre</label>
-            <input id="edit-actividad-nombre" type="text" />
+      </div>
+
+      <!-- MODAL: CONFIRMAR LOGOUT -->
+      <div id="modal-confirmar-logout" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>🚪 Cerrar Sesión</h3>
+            <button class="modal-close" data-close-modal="modal-confirmar-logout">&times;</button>
           </div>
-          <div class="form-group">
-            <label for="edit-actividad-max">Puntuación máxima</label>
-            <input id="edit-actividad-max" type="number" min="1" />
+          <div class="modal-body">
+            <p>¿Estás seguro de que deseas cerrar sesión?</p>
+            <p style="color: #0ea5e9; font-size: 0.9rem; margin-top: 1rem;">Tendrás que volver a iniciar sesión para
+              acceder.</p>
           </div>
           <div class="modal-actions">
-            <button id="btn-guardar-edicion-actividad" class="btn btn-primary" type="button">Guardar</button>
-            <button class="btn btn-secondary" type="button" data-close-modal="modal-editar-actividad">Cancelar</button>
+            <button id="btn-confirmar-logout" class="btn btn-danger" type="button">🚪 Cerrar Sesión</button>
+            <button class="btn btn-secondary" type="button" data-close-modal="modal-confirmar-logout">Cancelar</button>
           </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- MODAL: EDITAR PUNTAJE -->
-    <div id="modal-editar-puntaje" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>Editar Puntaje</h3>
-          <button class="modal-close" data-close-modal="modal-editar-puntaje">&times;</button>
-        </div>
-        <form onsubmit="return false">
-          <div class="form-group">
-            <label for="edit-puntaje-puntos">Puntos</label>
-            <input id="edit-puntaje-puntos" type="number" />
-          </div>
-          <div class="modal-actions">
-            <button id="btn-guardar-edicion-puntaje" class="btn btn-primary" type="button">Guardar</button>
-            <button class="btn btn-secondary" type="button" data-close-modal="modal-editar-puntaje">Cancelar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- MODAL: CONFIRMAR ELIMINACIÓN -->
-    <div id="modal-confirmar-eliminacion" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>⚠️ Confirmar Eliminación</h3>
-          <button class="modal-close" data-close-modal="modal-confirmar-eliminacion">&times;</button>
-        </div>
-        <div class="modal-body">
-          <p id="modal-eliminar-mensaje">¿Estás seguro de que deseas eliminar este elemento?</p>
-          <p style="color: #ef4444; font-size: 0.9rem; margin-top: 1rem;">Esta acción no se puede deshacer.</p>
-        </div>
-        <div class="modal-actions">
-          <button id="btn-confirmar-eliminacion" class="btn btn-danger" type="button">🗑️ Eliminar</button>
-          <button class="btn btn-secondary" type="button" data-close-modal="modal-confirmar-eliminacion">Cancelar</button>
         </div>
       </div>
-    </div>
-
-    <!-- MODAL: CONFIRMAR LOGOUT -->
-    <div id="modal-confirmar-logout" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>🚪 Cerrar Sesión</h3>
-          <button class="modal-close" data-close-modal="modal-confirmar-logout">&times;</button>
-        </div>
-        <div class="modal-body">
-          <p>¿Estás seguro de que deseas cerrar sesión?</p>
-          <p style="color: #0ea5e9; font-size: 0.9rem; margin-top: 1rem;">Tendrás que volver a iniciar sesión para acceder.</p>
-        </div>
-        <div class="modal-actions">
-          <button id="btn-confirmar-logout" class="btn btn-danger" type="button">🚪 Cerrar Sesión</button>
-          <button class="btn btn-secondary" type="button" data-close-modal="modal-confirmar-logout">Cancelar</button>
-        </div>
-      </div>
-    </div>
-  </main>
+    </main>
   </div>
 
   <script type="module" src="src/main.js"></script>
+  <script type="module">
+    import { registerSW } from 'virtual:pwa-register';
+    registerSW();
+  </script>
 </body>
-</html>
 
+</html>
