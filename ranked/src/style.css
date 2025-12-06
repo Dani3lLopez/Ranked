@@ -2326,3 +2326,77 @@ body {
     font-size: 0.85rem;
   }
 }
+
+/* ============================
+   Tabs responsivas desplazables
+   ============================ */
+
+/* Base: asegúrate que .tabs-nav sea flex por defecto */
+.tabs-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;           /* espacio por defecto */
+  overflow: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Estilo de los botones (mejorados) */
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: #d1d5db;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;   /* evita que el texto haga wrap */
+  flex: 0 0 auto;        /* no se encojan en fila desplazable */
+}
+
+/* pequeño toque visual */
+.tab-btn.active {
+  color: #fff;
+  background: rgba(99,102,241,0.14);
+}
+
+/* ============================
+   Mobile: convertir a scroll horizontal
+   ============================ */
+@media (max-width: 480px) {
+  .tabs-nav {
+    gap: 0.75rem !important;
+    margin-bottom: var(--spacing-md, 12px);
+    overflow-x: auto;                /* habilita scroll horizontal */
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.4rem 0.6rem;          /* espacio lateral para arrastrar */
+    scrollbar-width: none;           /* Firefox - oculta scrollbar */
+  }
+
+  /* Ocultar scroll en chromiums */
+  .tabs-nav::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    padding: 0.5rem 0.9rem !important; /* más espacio interno */
+    font-size: 0.95rem;
+    min-width: max-content;            /* asegurar que no quepa en línea */
+  }
+}
+
+/* Más agresivo para pantallas muy pequeñas (≤300px) */
+@media (max-width: 300px) {
+  .tabs-nav {
+    gap: 1rem !important;           /* más separación entre tabs */
+    padding-left: 0.9rem;
+    padding-right: 0.9rem;
+  }
+
+  .tab-btn {
+    padding: 0.55rem 1rem !important;
+    font-size: 0.95rem;
+    border-radius: 12px;
+  }
+}
+
+/* Fallback si alguna regla previa fuerza flex-wrap: wrap */
+.tabs-nav { flex-wrap: nowrap !important; }
+
