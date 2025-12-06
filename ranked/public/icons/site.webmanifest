@@ -1,0 +1,21 @@
+{
+  "name": "Ranked",
+  "short_name": "Ranked",
+  "icons": [
+    {
+      "src": "/ranked/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/ranked/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "theme_color": "#552b2b",
+  "background_color": "#917d7d",
+  "display": "standalone"
+}
