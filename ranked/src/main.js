@@ -9,8 +9,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ==================== AUTENTICACIÓN ====================
 // Credenciales estáticas de acceso
 const VALID_CREDENTIALS = [
-  { usuario: 'lider', password: '12345', rol: 'admin', nombre: 'Liderazgo' },
-  { usuario: 'juventud', password: 'campa2025', rol: 'user', nombre: 'Equipo' },
+  { usuario: 'lider', password: '12345', rol: 'admin', },
+  { usuario: 'juventud', password: 'campa2025', rol: 'user', },
 ];
 
 // Variables de sesión
